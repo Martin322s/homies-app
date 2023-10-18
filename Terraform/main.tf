@@ -2,7 +2,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "=3.0.0"
+      version = "3.75.0"
     }
   }
 }
@@ -12,12 +12,12 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "rg" {
-  name     = "Martin13s18HomiesRG"
-  location = "West Europe"
+  name     = var.resource_group_name
+  location = var.resource_group_location
 }
 
 resource "azurerm_service_plan" "asp" {
-  name                = "HomiesServicePlan"
+  name                = var.app_service_name
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   os_type             = "Linux"
@@ -25,7 +25,7 @@ resource "azurerm_service_plan" "asp" {
 }
 
 resource "azurerm_linux_web_app" "alwa" {
-  name                = "linux-web-app"
+  name                = var.app_service_name
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_service_plan.asp.location
   service_plan_id     = azurerm_service_plan.asp.id
@@ -46,22 +46,22 @@ resource "azurerm_linux_web_app" "alwa" {
 
 resource "azurerm_app_service_source_control" "sc" {
   app_id                 = azurerm_linux_web_app.alwa.id
-  repo_url               = "https://github.com/Martin322s/homies-app.git"
+  repo_url               = var.repo_URL
   branch                 = "main"
   use_manual_integration = true
 }
 
 resource "azurerm_mssql_server" "sqlserver" {
-  name                         = "mssqlserver"
+  name                         = var.sql_server_name
   resource_group_name          = azurerm_resource_group.rg.name
   location                     = azurerm_resource_group.rg.location
   version                      = "12.0"
-  administrator_login          = "missadministrator"
-  administrator_login_password = "yourStrongPassword12#"
+  administrator_login          = var.sql_administrator_login_username
+  administrator_login_password = var.sql_administrator_password
 }
 
 resource "azurerm_mssql_database" "database" {
-  name           = "Homies"
+  name           = var.sql_database_name
   server_id      = azurerm_mssql_server.sqlserver.id
   collation      = "SQL_Latin1_General_CP1_CI_AS"
   license_type   = "LicenseIncluded"
@@ -71,7 +71,7 @@ resource "azurerm_mssql_database" "database" {
 }
 
 resource "azurerm_mssql_firewall_rule" "firewall" {
-  name             = "azure-firewall"
+  name             = var.firewall_rule_name
   server_id        = azurerm_mssql_server.sqlserver.id
   start_ip_address = "0.0.0.0"
   end_ip_address   = "0.0.0.0"
