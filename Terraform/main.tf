@@ -52,3 +52,10 @@ resource "azurerm_mssql_server" "sqlserver" {
   administrator_login          = "missadministrator"
   administrator_login_password = "yourStrongPassword12#"
 }
+
+resource "azurerm_mssql_firewall_rule" "firewall" {
+  name             = "azure-firewall"
+  server_id        = azurerm_mssql_server.sqlserver.id
+  start_ip_address = "0.0.0.0"
+  end_ip_address   = "0.0.0.0"
+}
