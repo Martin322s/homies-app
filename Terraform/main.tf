@@ -25,9 +25,9 @@ resource "azurerm_service_plan" "asp" {
 }
 
 resource "azurerm_linux_web_app" "alwa" {
-  name                = "Linux Web App"
+  name                = "linux-web-app"
   resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_service_plan.rg.location
+  location            = azurerm_service_plan.asp.location
   service_plan_id     = azurerm_service_plan.asp.id
 
   connection_string {
@@ -44,6 +44,13 @@ resource "azurerm_linux_web_app" "alwa" {
   }
 }
 
+resource "azurerm_app_service_source_control" "sc" {
+  app_id                 = azurerm_linux_web_app.alwa.id
+  repo_url               = "https://github.com/Martin322s/homies-app.git"
+  branch                 = "main"
+  use_manual_integration = true
+}
+
 resource "azurerm_mssql_server" "sqlserver" {
   name                         = "mssqlserver"
   resource_group_name          = azurerm_resource_group.rg.name
@@ -54,7 +61,7 @@ resource "azurerm_mssql_server" "sqlserver" {
 }
 
 resource "azurerm_mssql_database" "database" {
-  name           = "sqldatabase"
+  name           = "Homies"
   server_id      = azurerm_mssql_server.sqlserver.id
   collation      = "SQL_Latin1_General_CP1_CI_AS"
   license_type   = "LicenseIncluded"
